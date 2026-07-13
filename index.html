@@ -1,521 +1,570 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Viking.net — InfoSec Shield</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+<title>Viking.net — щит в мире InfoSec</title>
+<meta name="description" content="Viking.net — мониторинг угроз, разбор инцидентов и цифровая грамотность.">
+<link rel="icon" href="img.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:            #08090a;
+    --bg-panel:      rgba(19,24,22,0.55);
+    --bg-panel-2:    rgba(13,17,16,0.65);
+    --ink:           #e7ece8;
+    --ink-dim:       #8b9793;
+    --ink-faint:     #4d5652;
+    --verdigris:     #5fae8f;
+    --verdigris-dim: rgba(95,174,143,0.18);
+    --amber:         #d1a054;
+    --amber-dim:     rgba(209,160,84,0.20);
+    --rust:          #b8564a;
+    --rust-dim:      rgba(184,86,74,0.16);
 
-        html {
-            scroll-behavior: smooth;
-        }
+    --serif: 'Cinzel', Georgia, serif;
+    --sans:  'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --mono:  'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+    --gap-section: 96px;
+  }
 
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif;
-            background: #0a0c14;
-            color: #e4e7f0;
-            overflow-x: hidden;
-            width: 100%;
-            min-height: 100vh;
-        }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior:auto; }
+    *{ animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important; }
+  }
 
-        #dynamic-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: 0;
-            pointer-events: none;
-            background: radial-gradient(ellipse at center, #0a1628 0%, #060a14 100%);
-            overflow: hidden;
-        }
+  body{
+    font-family:var(--sans); background:var(--bg); color:var(--ink);
+    min-height:100vh; overflow-x:hidden; line-height:1.65;
+  }
+  a{ color:inherit; }
+  :focus-visible{ outline:2px solid var(--verdigris); outline-offset:3px; border-radius:2px; }
+  img{ max-width:100%; display:block; }
 
-        #dynamic-bg .pulse {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 200%;
-            height: 200%;
-            transform: translate(-50%, -50%);
-            background: radial-gradient(circle at center, rgba(100, 180, 255, 0.06) 0%, rgba(60, 120, 255, 0.02) 40%, transparent 70%);
-            animation: pulseGlow 4s ease-in-out infinite;
-            border-radius: 50%;
-        }
+  html[data-viewport="xs"] .knotfield,
+  html[data-viewport="sm"] .knotfield{ opacity:0.35; }
+  html[data-viewport="xs"] .hero-ember:nth-child(n+4){ display:none; }
+  html[data-motion="off"] .scanline,
+  html[data-motion="off"] .hero-ember,
+  html[data-motion="off"] .knotfield,
+  html[data-motion="off"] .ship-drift{ animation:none !important; }
+  html[data-motion="off"] .tilt-card,
+  html[data-motion="off"] .hero-shield{ transform:none !important; }
 
-        #dynamic-bg .pulse:nth-child(2) {
-            animation-delay: 2s;
-            width: 250%;
-            height: 250%;
-            background: radial-gradient(circle at center, rgba(150, 200, 255, 0.04) 0%, rgba(80, 140, 255, 0.01) 50%, transparent 80%);
-        }
+  /* ============ backdrop + chainmail texture ============ */
+  #backdrop{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    background:
+      radial-gradient(ellipse 90% 55% at 50% -8%, rgba(95,174,143,0.09), transparent 60%),
+      radial-gradient(ellipse 70% 45% at 88% 105%, rgba(184,86,74,0.06), transparent 60%),
+      var(--bg);
+  }
+  #backdrop .grain{
+    position:absolute; inset:0;
+    background-image:repeating-linear-gradient(115deg, rgba(255,255,255,0.012) 0 2px, transparent 2px 6px);
+    mix-blend-mode:overlay;
+  }
+  #backdrop .chainmail{
+    position:absolute; inset:0; opacity:0.35;
+    background-image:
+      radial-gradient(circle at 0 0, transparent 7px, rgba(95,174,143,0.045) 8px, transparent 9px),
+      radial-gradient(circle at 18px 18px, transparent 7px, rgba(95,174,143,0.045) 8px, transparent 9px);
+    background-size:36px 36px;
+  }
 
-        @keyframes pulseGlow {
-            0%, 100% { opacity: 0.4; transform: translate(-50%, -50%) scale(0.8); }
-            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
-        }
+  .knot-svg path{ fill:none; stroke:var(--verdigris); stroke-width:1.4; stroke-linecap:square; }
+  .knot-svg circle{ fill:var(--amber); }
 
-        .shooting-star {
-            position: absolute;
-            width: 2px;
-            height: 80px;
-            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0));
-            border-radius: 50%;
-            animation: shoot linear infinite;
-            opacity: 0;
-            filter: blur(1px);
-        }
+  .knotfield{
+    position:absolute; top:50%; left:50%; width:min(760px,92vw); height:min(760px,92vw);
+    transform:translate(-50%,-52%); opacity:0.07; z-index:-1; pointer-events:none;
+    animation:knot-breathe 10s ease-in-out infinite;
+  }
+  @keyframes knot-breathe{ 0%,100%{ opacity:0.05; } 50%{ opacity:0.10; } }
 
-        .shooting-star:nth-child(3) { left: 10%; top: -10%; animation-duration: 3.2s; animation-delay: 0.5s; width: 3px; height: 100px; }
-        .shooting-star:nth-child(4) { left: 25%; top: -5%; animation-duration: 4.5s; animation-delay: 1.2s; width: 2px; height: 70px; }
-        .shooting-star:nth-child(5) { left: 45%; top: -15%; animation-duration: 3.8s; animation-delay: 2.0s; width: 3px; height: 120px; }
-        .shooting-star:nth-child(6) { left: 60%; top: -8%; animation-duration: 5.0s; animation-delay: 0.8s; width: 2px; height: 90px; }
-        .shooting-star:nth-child(7) { left: 75%; top: -12%; animation-duration: 4.2s; animation-delay: 1.8s; width: 3px; height: 110px; }
-        .shooting-star:nth-child(8) { left: 90%; top: -6%; animation-duration: 3.5s; animation-delay: 2.5s; width: 2px; height: 80px; }
-        .shooting-star:nth-child(9) { left: 15%; top: -20%; animation-duration: 4.8s; animation-delay: 3.0s; width: 3px; height: 100px; }
-        .shooting-star:nth-child(10) { left: 50%; top: -3%; animation-duration: 3.0s; animation-delay: 0.3s; width: 2px; height: 60px; }
-        .shooting-star:nth-child(11) { left: 70%; top: -25%; animation-duration: 5.5s; animation-delay: 1.5s; width: 3px; height: 130px; }
-        .shooting-star:nth-child(12) { left: 35%; top: -30%; animation-duration: 4.0s; animation-delay: 2.2s; width: 2px; height: 90px; }
+  /* ============ nav ============ */
+  .navbar{
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 32px;
+    background:rgba(8,9,10,0.6);
+    backdrop-filter:blur(20px) saturate(160%);
+    -webkit-backdrop-filter:blur(20px) saturate(160%);
+    border-bottom:1px solid var(--verdigris-dim);
+    flex-wrap:wrap; gap:12px;
+  }
+  .navbar .logo-section{ display:flex; align-items:center; gap:12px; }
+  .navbar .logo-img{ height:36px; width:36px; object-fit:contain; border-radius:6px; }
+  .navbar .brand{ font-family:var(--serif); font-weight:700; font-size:1.1rem; letter-spacing:1.5px; color:var(--ink); }
+  .navbar .nav-links{ display:flex; gap:30px; align-items:center; }
+  .navbar .nav-links a{
+    text-decoration:none; font-size:0.78rem; font-weight:500; letter-spacing:2px;
+    text-transform:uppercase; color:var(--ink-dim); transition:color .2s;
+    position:relative; padding-bottom:4px; font-family:var(--mono);
+  }
+  .navbar .nav-links a::after{
+    content:''; position:absolute; bottom:0; left:0; width:0; height:1px;
+    background:var(--verdigris); transition:width .25s;
+  }
+  .navbar .nav-links a:hover{ color:var(--ink); }
+  .navbar .nav-links a:hover::after{ width:100%; }
 
-        @keyframes shoot {
-            0% { transform: translateY(0) rotate(-25deg) scale(0); opacity: 0; }
-            5% { opacity: 1; }
-            20% { transform: translateY(40vh) rotate(-25deg) scale(1); opacity: 0.8; }
-            40% { transform: translateY(80vh) rotate(-25deg) scale(0.8); opacity: 0.4; }
-            60% { transform: translateY(120vh) rotate(-25deg) scale(0.5); opacity: 0.1; }
-            100% { transform: translateY(150vh) rotate(-25deg) scale(0); opacity: 0; }
-        }
+  /* ============ hero ============ */
+  .hero{
+    position:relative; z-index:1; min-height:100vh; perspective:1400px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:150px 24px 90px;
+  }
+  .hero-embers{ position:absolute; inset:0; overflow:hidden; z-index:-1; }
+  .hero-ember{
+    position:absolute; bottom:-10px; width:2px; height:2px; border-radius:50%;
+    background:var(--amber); box-shadow:0 0 6px 1px rgba(209,160,84,0.6);
+    animation:rise linear infinite; opacity:0;
+  }
+  .hero-ember:nth-child(1){ left:9%;  animation-duration:15s; animation-delay:0s; }
+  .hero-ember:nth-child(2){ left:23%; animation-duration:19s; animation-delay:3s; }
+  .hero-ember:nth-child(3){ left:38%; animation-duration:12s; animation-delay:6s; }
+  .hero-ember:nth-child(4){ left:55%; animation-duration:17s; animation-delay:1s; }
+  .hero-ember:nth-child(5){ left:69%; animation-duration:21s; animation-delay:8s; }
+  .hero-ember:nth-child(6){ left:80%; animation-duration:13s; animation-delay:4s; }
+  .hero-ember:nth-child(7){ left:92%; animation-duration:18s; animation-delay:10s; }
+  @keyframes rise{
+    0%{ transform:translateY(0) scale(0.6); opacity:0; }
+    12%{ opacity:0.9; } 90%{ opacity:0.15; }
+    100%{ transform:translateY(-100vh) scale(1); opacity:0; }
+  }
 
-        .navbar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 100;
-            padding: 16px 32px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: rgba(18, 24, 42, 0.35);
-            backdrop-filter: blur(20px) saturate(200%);
-            -webkit-backdrop-filter: blur(20px) saturate(200%);
-            border-bottom: 1px solid rgba(120, 150, 255, 0.08);
-            flex-wrap: wrap;
-            gap: 12px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-        }
+  /* --- signature: 3D glass shield, tilts toward the pointer --- */
+  .hero-shield-wrap{ margin-bottom:26px; transform-style:preserve-3d; }
+  .hero-shield{
+    width:150px; height:150px;
+    transform-style:preserve-3d;
+    transition:transform .5s cubic-bezier(.2,.8,.2,1);
+    filter:drop-shadow(0 22px 40px rgba(0,0,0,0.55)) drop-shadow(0 0 30px rgba(95,174,143,0.18));
+    animation:float 6s ease-in-out infinite;
+  }
+  @keyframes float{ 0%,100%{ transform:translateY(0) rotateX(0) rotateY(0); } 50%{ transform:translateY(-9px) rotateX(0) rotateY(0); } }
 
-        .navbar .logo-section {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+  .hero .eyebrow{
+    font-family:var(--mono); font-size:0.74rem; letter-spacing:3px; text-transform:uppercase;
+    color:var(--verdigris); margin-bottom:22px; display:flex; align-items:center; gap:10px;
+  }
+  .hero .eyebrow::before, .hero .eyebrow::after{ content:''; width:26px; height:1px; background:var(--verdigris-dim); }
+  .hero h1{
+    font-family:var(--serif); font-weight:800; font-size:clamp(2.5rem, 9vw, 5.4rem);
+    letter-spacing:2px; color:var(--ink); text-shadow:0 0 50px rgba(95,174,143,0.10);
+    line-height:1.05; margin-bottom:18px;
+  }
+  .hero .rune-caption{
+    font-family:var(--mono); font-size:0.72rem; color:var(--ink-faint); letter-spacing:0.5px;
+    margin-bottom:30px;
+  }
+  .hero .rune-caption .glyph{ color:var(--amber); font-size:0.95rem; margin-right:6px; }
 
-        .navbar .logo-img {
-            height: 40px;
-            width: auto;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.03);
-            padding: 4px 8px;
-            border: 1px solid rgba(130, 170, 255, 0.08);
-            transition: 0.2s;
-        }
-        .navbar .logo-img:hover {
-            transform: scale(1.05);
-            filter: drop-shadow(0 0 20px rgba(80, 150, 255, 0.15));
-        }
+  .hero .terminal-line{
+    font-family:var(--mono); font-size:clamp(0.95rem, 2vw, 1.15rem);
+    color:var(--ink-dim); margin-bottom:42px; max-width:560px;
+  }
+  .hero .terminal-line .caret{
+    display:inline-block; width:9px; height:1.1em; background:var(--amber);
+    margin-left:4px; vertical-align:text-bottom; animation:blink 1s steps(1) infinite;
+  }
+  @keyframes blink{ 50%{ opacity:0; } }
 
-        .navbar .brand {
-            font-size: 1.3rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #d6e2ff, #9bb4f5);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
+  .hero .cta-btn{
+    display:inline-flex; align-items:center; gap:10px; padding:15px 42px 15px 32px;
+    background:var(--verdigris); color:#08120d; border-radius:2px;
+    font-weight:700; font-size:0.92rem; letter-spacing:1px; text-transform:uppercase;
+    text-decoration:none; transition:transform .2s, box-shadow .2s, background .2s;
+    box-shadow:0 8px 30px -8px rgba(95,174,143,0.35);
+  }
+  .hero .cta-btn svg{ width:16px; height:16px; fill:currentColor; }
+  .hero .cta-btn:hover{ background:#78c7a5; transform:translateY(-2px); box-shadow:0 14px 40px -10px rgba(95,174,143,0.5); }
 
-        .navbar .nav-links {
-            display: flex;
-            gap: 28px;
-            align-items: center;
-        }
+  .scanline{
+    position:absolute; left:0; right:0; height:2px;
+    background:linear-gradient(90deg, transparent, rgba(95,174,143,0.5), transparent);
+    animation:scan 6s linear infinite; z-index:-1;
+  }
+  @keyframes scan{ 0%{ top:8%; } 100%{ top:96%; } }
 
-        .navbar .nav-links a {
-            color: #b0c0e8;
-            text-decoration: none;
-            font-size: 0.95rem;
-            font-weight: 500;
-            transition: 0.2s;
-            position: relative;
-        }
-        .navbar .nav-links a:hover {
-            color: #d6e2ff;
-        }
-        .navbar .nav-links a::after {
-            content: '';
-            position: absolute;
-            bottom: -4px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: linear-gradient(90deg, #6a8fe0, #9bb4f5);
-            transition: 0.2s;
-        }
-        .navbar .nav-links a:hover::after {
-            width: 100%;
-        }
+  /* ============ dividers: drifting drakkar over a knot mark ============ */
+  .knot-divider{
+    position:relative; z-index:1; display:flex; align-items:center; gap:18px;
+    max-width:1000px; margin:0 auto; padding:0 24px; overflow:hidden; height:40px;
+  }
+  .knot-divider .line{ flex:1; height:1px; background:linear-gradient(90deg, transparent, var(--verdigris-dim) 20%, var(--verdigris-dim) 80%, transparent); }
+  .knot-divider .knot-mark{ width:34px; height:34px; flex-shrink:0; opacity:0.85; position:relative; z-index:2; }
+  .knot-divider .ship-drift{
+    position:absolute; top:50%; left:-120px; width:140px; height:30px;
+    transform:translateY(-60%); opacity:0.35;
+    animation:sail 34s linear infinite;
+  }
+  @keyframes sail{ 0%{ left:-160px; } 100%{ left:110%; } }
 
-        .hero {
-            position: relative;
-            z-index: 1;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 100px 24px 60px;
-        }
+  /* ============ sections ============ */
+  .section{ position:relative; z-index:1; padding:var(--gap-section) 24px; max-width:980px; margin:0 auto; }
+  .section-head{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:28px; gap:20px; flex-wrap:wrap; }
+  .section-head .rune-tag{ font-family:var(--mono); font-size:0.72rem; color:var(--amber); letter-spacing:0.5px; display:flex; align-items:center; gap:6px; }
+  .section-head .rune-tag .glyph{ font-size:1rem; }
+  .section-head h2{ font-family:var(--serif); font-weight:700; font-size:clamp(1.7rem, 3.6vw, 2.3rem); color:var(--ink); letter-spacing:0.5px; margin-top:6px; }
 
-        .hero .viking-icon {
-            font-size: 5rem;
-            margin-bottom: 12px;
-            filter: drop-shadow(0 0 40px rgba(100, 150, 255, 0.12));
-            animation: float 3s ease-in-out infinite;
-        }
+  /* --- 3D glass panel with pointer tilt + moving sheen --- */
+  .tilt-card{ transform-style:preserve-3d; will-change:transform; transition:transform .4s cubic-bezier(.2,.8,.2,1); }
+  .panel{
+    position:relative;
+    background:linear-gradient(155deg, var(--bg-panel), var(--bg-panel-2));
+    backdrop-filter:blur(22px) saturate(170%);
+    -webkit-backdrop-filter:blur(22px) saturate(170%);
+    border:1px solid rgba(95,174,143,0.16);
+    border-radius:10px; padding:44px; overflow:hidden;
+    box-shadow:
+      0 30px 80px -30px rgba(0,0,0,0.8),
+      inset 0 1px 0 rgba(255,255,255,0.05),
+      inset 0 -30px 60px -50px rgba(95,174,143,0.18);
+  }
+  .panel::before{
+    content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+    background:radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(255,255,255,0.10), transparent 45%);
+    opacity:0; transition:opacity .3s;
+  }
+  .tilt-card:hover .panel::before{ opacity:1; }
+  .panel::after{
+    content:''; position:absolute; top:0; left:8%; right:8%; height:1px;
+    background:linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent);
+  }
+  .panel p{ color:#c7d0cb; font-size:1.02rem; line-height:1.85; margin-bottom:16px; }
+  .panel p:last-of-type{ margin-bottom:0; }
+  .panel strong{ color:var(--ink); font-weight:600; }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-12px); }
-        }
+  .threat-log{ margin-top:26px; display:flex; flex-direction:column; gap:8px; font-family:var(--mono); font-size:0.82rem; }
+  .threat-log .entry{ display:flex; align-items:center; gap:12px; padding:10px 14px; background:var(--rust-dim); border-left:2px solid var(--rust); color:#e3b6ae; }
+  .threat-log .entry .status{ color:var(--rust); font-weight:600; }
 
-        .hero h1 {
-            font-size: clamp(2.8rem, 10vw, 5.5rem);
-            font-weight: 800;
-            background: linear-gradient(135deg, #d6e2ff, #7a9ee0);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 0 60px rgba(80, 140, 255, 0.08);
-            line-height: 1.1;
-            margin-bottom: 16px;
-        }
+  /* ============ links / contact ============ */
+  .links-grid{ display:flex; flex-direction:column; gap:12px; margin-top:24px; }
+  .links-grid .link-btn{
+    display:flex; align-items:center; gap:16px;
+    background:rgba(255,255,255,0.02); border:1px solid rgba(95,174,143,0.14);
+    border-radius:3px; padding:16px 22px; text-decoration:none; color:var(--ink);
+    transition:background .2s, border-color .2s, transform .2s;
+  }
+  .links-grid .link-btn:hover{ background:var(--verdigris-dim); border-color:rgba(95,174,143,0.5); transform:translateX(4px); }
+  .links-grid .link-btn .icon{ font-size:1.3rem; width:28px; text-align:center; flex-shrink:0; color:var(--amber); }
+  .links-grid .link-btn .label{ font-weight:500; flex:1; font-size:0.98rem; }
+  .links-grid .link-btn .url{
+    font-family:var(--mono); font-size:0.72rem; color:var(--ink-faint);
+    background:rgba(0,0,0,0.3); padding:5px 14px; border-radius:2px;
+    border:1px solid rgba(255,255,255,0.04); white-space:nowrap;
+  }
 
-        .hero .subtitle {
-            font-size: clamp(1.1rem, 2.5vw, 1.6rem);
-            color: #a7bae8;
-            font-weight: 300;
-            letter-spacing: 1px;
-            border-left: 3px solid rgba(100, 150, 255, 0.2);
-            padding-left: 24px;
-            margin-bottom: 32px;
-            backdrop-filter: blur(2px);
-        }
+  .feedback-bar{
+    margin-top:26px; background:rgba(0,0,0,0.22); border:1px dashed rgba(209,160,84,0.3);
+    border-radius:3px; padding:20px 26px; display:flex; align-items:center;
+    justify-content:space-between; flex-wrap:wrap; gap:16px;
+  }
+  .feedback-bar .text{ color:var(--ink-dim); font-size:0.95rem; }
+  .feedback-bar .contact-btn{
+    display:inline-flex; align-items:center; gap:8px;
+    background:transparent; border:1px solid var(--amber); color:var(--amber);
+    padding:10px 26px; border-radius:2px; font-weight:600; font-size:0.9rem;
+    letter-spacing:0.5px; text-decoration:none; transition:background .2s, color .2s; white-space:nowrap;
+  }
+  .feedback-bar .contact-btn svg{ width:13px; height:13px; fill:currentColor; }
+  .feedback-bar .contact-btn:hover{ background:var(--amber); color:#1a1206; }
 
-        .hero .cta-btn {
-            display: inline-block;
-            padding: 16px 48px;
-            background: rgba(50, 100, 220, 0.12);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(130, 180, 255, 0.12);
-            border-radius: 60px;
-            color: #d6e0ff;
-            font-size: 1.1rem;
-            font-weight: 600;
-            text-decoration: none;
-            transition: 0.25s;
-            box-shadow: 0 0 30px rgba(60, 120, 255, 0.03);
-        }
-        .hero .cta-btn:hover {
-            background: rgba(60, 120, 240, 0.18);
-            border-color: rgba(160, 200, 255, 0.20);
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 16px 40px -8px rgba(0, 40, 120, 0.2);
-        }
+  /* ============ footer with Yggdrasil roots ============ */
+  .footer{ position:relative; z-index:1; text-align:center; padding:70px 24px 44px; color:var(--ink-faint); font-size:0.82rem; overflow:hidden; }
+  .footer .yggdrasil{
+    position:absolute; bottom:-20px; left:50%; transform:translateX(-50%);
+    width:min(900px,140vw); opacity:0.06; z-index:-1; pointer-events:none;
+  }
+  .footer .logo-img{ width:26px; height:26px; margin:0 auto 14px; opacity:0.75; object-fit:contain; }
+  .footer .foot-links{ margin-top:10px; }
+  .footer a{ color:var(--verdigris); opacity:0.8; text-decoration:none; border-bottom:1px dotted rgba(95,174,143,0.3); margin:0 8px; transition:opacity .2s; }
+  .footer a:hover{ opacity:1; }
 
-        .section {
-            position: relative;
-            z-index: 1;
-            padding: 80px 24px;
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-
-        .section .glass {
-            background: rgba(18, 24, 42, 0.30);
-            backdrop-filter: blur(20px) saturate(200%);
-            -webkit-backdrop-filter: blur(20px) saturate(200%);
-            border-radius: 40px;
-            padding: 44px 40px;
-            border: 1px solid rgba(120, 150, 255, 0.06);
-            box-shadow: 0 20px 60px -20px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.03);
-        }
-
-        .section h2 {
-            font-size: clamp(2rem, 4vw, 2.8rem);
-            font-weight: 700;
-            background: linear-gradient(135deg, #d6e2ff, #9bb4f5);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 16px;
-        }
-
-        .section p {
-            color: #c8d2f0;
-            font-size: 1.05rem;
-            line-height: 1.8;
-            margin-bottom: 16px;
-        }
-
-        .links-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-            margin-top: 20px;
-        }
-
-        .links-grid .link-btn {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            background: rgba(20, 30, 60, 0.20);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-radius: 80px;
-            padding: 14px 26px;
-            border: 1px solid rgba(130, 180, 255, 0.06);
-            text-decoration: none;
-            color: #e0e8ff;
-            transition: 0.2s;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-        }
-        .links-grid .link-btn:hover {
-            background: rgba(40, 70, 150, 0.18);
-            border-color: rgba(160, 200, 255, 0.15);
-            transform: translateY(-2px);
-        }
-        .links-grid .link-btn .icon {
-            font-size: 1.5rem;
-            width: 32px;
-            text-align: center;
-        }
-        .links-grid .link-btn .label {
-            font-weight: 500;
-            flex: 1;
-        }
-        .links-grid .link-btn .url {
-            font-size: 0.7rem;
-            color: #889ed4;
-            background: rgba(0, 0, 0, 0.20);
-            padding: 4px 18px;
-            border-radius: 60px;
-            border: 1px solid rgba(255, 255, 255, 0.03);
-        }
-
-        .feedback-section {
-            margin-top: 24px;
-            background: rgba(8, 14, 34, 0.25);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-radius: 60px;
-            padding: 18px 28px;
-            display: flex;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 16px 20px;
-            border: 1px solid rgba(130, 180, 255, 0.04);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
-        }
-        .feedback-section .text {
-            color: #bcc9f0;
-            font-size: 0.95rem;
-        }
-        .feedback-section .contact-btn {
-            background: rgba(50, 100, 220, 0.12);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            padding: 10px 28px;
-            border-radius: 60px;
-            font-weight: 600;
-            color: #d6e0ff;
-            border: 1px solid rgba(130, 180, 255, 0.08);
-            text-decoration: none;
-            transition: 0.15s;
-        }
-        .feedback-section .contact-btn:hover {
-            background: rgba(60, 120, 240, 0.18);
-            border-color: rgba(160, 200, 255, 0.20);
-        }
-
-        .footer {
-            position: relative;
-            z-index: 1;
-            text-align: center;
-            padding: 40px 24px;
-            color: #5a648b;
-            font-size: 0.85rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.02);
-        }
-        .footer a {
-            color: #8999d9;
-            text-decoration: none;
-            border-bottom: 1px dotted rgba(100, 150, 255, 0.12);
-            margin: 0 6px;
-        }
-        .footer a:hover {
-            color: #b0c4ff;
-        }
-
-        @media (max-width: 768px) {
-            .navbar {
-                padding: 12px 16px;
-            }
-            .navbar .nav-links {
-                gap: 16px;
-            }
-            .navbar .nav-links a {
-                font-size: 0.85rem;
-            }
-            .navbar .brand {
-                font-size: 1rem;
-            }
-            .navbar .logo-img {
-                height: 32px;
-            }
-            .section .glass {
-                padding: 28px 20px;
-                border-radius: 28px;
-            }
-            .links-grid .link-btn {
-                flex-wrap: wrap;
-                padding: 12px 18px;
-            }
-            .links-grid .link-btn .url {
-                margin-left: auto;
-            }
-            .feedback-section {
-                padding: 16px 20px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .navbar .nav-links {
-                gap: 12px;
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-            .navbar .brand {
-                font-size: 0.9rem;
-            }
-            .hero h1 {
-                font-size: 2.4rem;
-            }
-            .hero .subtitle {
-                font-size: 1rem;
-                padding-left: 16px;
-            }
-            .section .glass {
-                padding: 20px 16px;
-                border-radius: 24px;
-            }
-        }
-    </style>
+  /* ============ responsive ============ */
+  @media (max-width:900px){ :root{ --gap-section:72px; } }
+  @media (max-width:768px){
+    .navbar{ padding:12px 16px; }
+    .navbar .nav-links{ gap:16px; }
+    .navbar .nav-links a{ font-size:0.68rem; letter-spacing:1px; }
+    .navbar .brand{ font-size:0.92rem; }
+    .navbar .logo-img{ height:30px; width:30px; }
+    .panel{ padding:26px 22px; }
+    .links-grid .link-btn{ flex-wrap:wrap; }
+    .links-grid .link-btn .url{ margin-left:44px; }
+    .hero{ padding-top:130px; }
+    .hero-shield{ width:120px; height:120px; }
+  }
+  @media (max-width:480px){
+    :root{ --gap-section:56px; }
+    .hero h1{ font-size:2.3rem; }
+    .hero-shield{ width:96px; height:96px; }
+    .section-head{ flex-direction:column; align-items:flex-start; gap:4px; }
+  }
+  @media (hover:none){
+    .tilt-card, .hero-shield{ transform:none !important; }
+  }
+</style>
 </head>
 <body>
 
-    <div id="dynamic-bg">
-        <div class="pulse"></div>
-        <div class="pulse"></div>
-        <div class="shooting-star"></div>
-        <div class="shooting-star"></div>
-        <div class="shooting-star"></div>
-        <div class="shooting-star"></div>
-        <div class="shooting-star"></div>
-        <div class="shooting-star"></div>
-        <div class="shooting-star"></div>
-        <div class="shooting-star"></div>
-        <div class="shooting-star"></div>
-        <div class="shooting-star"></div>
+  <div id="backdrop">
+    <div class="grain"></div>
+    <div class="chainmail"></div>
+    <svg class="knotfield" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <g class="knot-svg">
+        <path d="M100 20 L100 60 L60 60 L60 100 L20 100 M100 20 L100 60 L140 60 L140 100 L180 100
+                 M100 180 L100 140 L60 140 L60 100 M100 180 L100 140 L140 140 L140 100"/>
+        <circle cx="100" cy="20" r="3"/><circle cx="100" cy="180" r="3"/>
+        <circle cx="20" cy="100" r="3"/><circle cx="180" cy="100" r="3"/>
+      </g>
+    </svg>
+  </div>
+
+  <nav class="navbar">
+    <div class="logo-section">
+      <img src="img.png" alt="Viking.net" class="logo-img" onerror="this.style.display='none'">
+      <span class="brand">VIKING.NET</span>
+    </div>
+    <div class="nav-links">
+      <a href="#home">Дом</a>
+      <a href="#about">О нас</a>
+      <a href="#contact">Связь</a>
+    </div>
+  </nav>
+
+  <section id="home" class="hero">
+    <div class="hero-embers">
+      <span class="hero-ember"></span><span class="hero-ember"></span><span class="hero-ember"></span>
+      <span class="hero-ember"></span><span class="hero-ember"></span><span class="hero-ember"></span><span class="hero-ember"></span>
+    </div>
+    <div class="scanline"></div>
+
+    <div class="hero-shield-wrap">
+      <svg class="hero-shield" id="heroShield" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <radialGradient id="bossGrad" cx="35%" cy="30%" r="70%">
+            <stop offset="0%" stop-color="#f3e0b3"/>
+            <stop offset="55%" stop-color="#d1a054"/>
+            <stop offset="100%" stop-color="#5f4420"/>
+          </radialGradient>
+          <linearGradient id="shieldGlass" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="rgba(95,174,143,0.28)"/>
+            <stop offset="100%" stop-color="rgba(95,174,143,0.02)"/>
+          </linearGradient>
+        </defs>
+        <circle cx="120" cy="120" r="106" fill="url(#shieldGlass)" stroke="#5fae8f" stroke-width="1.5"/>
+        <circle cx="120" cy="120" r="84" fill="none" stroke="#5fae8f" stroke-opacity="0.4" stroke-width="1"/>
+        <g fill="#d1a054">
+          <circle cx="120" cy="20" r="4"/><circle cx="120" cy="220" r="4"/>
+          <circle cx="20" cy="120" r="4"/><circle cx="220" cy="120" r="4"/>
+          <circle cx="48" cy="48" r="3.2"/><circle cx="192" cy="48" r="3.2"/>
+          <circle cx="48" cy="192" r="3.2"/><circle cx="192" cy="192" r="3.2"/>
+        </g>
+        <circle cx="120" cy="120" r="30" fill="url(#bossGrad)" stroke="#3d2c12" stroke-width="1"/>
+        <path d="M120 100 L120 140 M100 120 L140 120" stroke="#3d2c12" stroke-width="2"/>
+      </svg>
     </div>
 
-    <nav class="navbar">
-        <div class="logo-section">
-            <img src="img.png" alt="Viking.net" class="logo-img" onerror="this.style.display='none'">
-            <span class="brand">Viking.net</span>
-        </div>
-        <div class="nav-links">
-            <a href="#home">Home</a>
-            <a href="#about">About</a>
-            <a href="#contact">Contact</a>
-        </div>
-    </nav>
+    <div class="eyebrow">Shield-wall // InfoSec</div>
+    <h1>VIKING.NET</h1>
+    <div class="rune-caption"><span class="glyph">ᛊ</span>Совило — руна защиты и победы</div>
+    <p class="terminal-line">⚡ вступай на борт и поплыли в путешествие!<span class="caret"></span></p>
+    <a href="#about" class="cta-btn">
+      <svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="8" rx="1.5"/><rect x="10" y="10" width="4" height="11" rx="1"/></svg>
+      Начать путь
+    </a>
+  </section>
 
-    <section id="home" class="hero">
-        <div class="viking-icon">🛡️</div>
-        <h1>Viking.net</h1>
-        <div class="subtitle">⚡ вступай на борт и поплыли в путешествие!</div>
-        <a href="#about" class="cta-btn">Начать путь →</a>
-    </section>
+  <div class="knot-divider">
+    <div class="line"></div>
+    <svg class="ship-drift" viewBox="0 0 300 60" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M10 45 Q40 55 150 55 Q260 55 290 45 L270 40 Q150 48 30 40 Z" fill="#5fae8f"/>
+      <path d="M270 40 C282 30 286 15 274 5 C270 13 264 23 259 30 Z" fill="#5fae8f"/>
+      <line x1="150" y1="40" x2="150" y2="6" stroke="#d1a054" stroke-width="2"/>
+      <path d="M150 9 L192 20 L150 31 Z" fill="#d1a054" opacity="0.75"/>
+    </svg>
+    <svg class="knot-mark knot-svg" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M20 4 L20 14 L12 14 L12 20 M20 4 L20 14 L28 14 L28 20 M20 36 L20 26 L12 26 L12 20 M20 36 L20 26 L28 26 L28 20"/>
+      <circle cx="20" cy="4" r="2"/><circle cx="20" cy="36" r="2"/>
+    </svg>
+    <div class="line"></div>
+  </div>
 
-    <section id="about" class="section">
-        <div class="glass">
-            <h2>⚔️ О проекте</h2>
-            <p>
-                <strong>Viking.net</strong> — твой щит и радар в мире InfoSec. Мы мониторим угрозы, 
-                разбираем инциденты и повышаем цифровую грамотность. От глобальных уязвимостей 
-                до локальных атак — мы всегда на передовой.
-            </p>
-            <p>
-                В центре внимания — деструктивные действия <strong>«Noname057(16)»</strong> и 
-                <strong>Z-pentest alliance</strong>. Мы анализируем их методы и предупреждаем сообщество.
-            </p>
+  <section id="about" class="section">
+    <div class="section-head">
+      <div>
+        <div class="rune-tag"><span class="glyph">ᚦ</span>Турисаз — руна силы и защиты</div>
+        <h2>О проекте</h2>
+      </div>
+    </div>
+    <div class="tilt-card">
+      <div class="panel">
+        <p>
+          <strong>Viking.net</strong> — твой щит и радар в мире InfoSec. Мы мониторим угрозы,
+          разбираем инциденты и повышаем цифровую грамотность. От глобальных уязвимостей
+          до локальных атак — мы всегда на передовой.
+        </p>
+        <p>
+          В центре внимания — деструктивные действия <strong>«Noname057(16)»</strong> и
+          <strong>Z-pentest alliance</strong>. Мы анализируем их методы и предупреждаем сообщество.
+        </p>
+        <div class="threat-log">
+          <div class="entry"><span class="status">[ТРЕК]</span> Noname057(16) — активность отслеживается</div>
+          <div class="entry"><span class="status">[ТРЕК]</span> Z-pentest alliance — активность отслеживается</div>
         </div>
-    </section>
+      </div>
+    </div>
+  </section>
 
-    <section id="contact" class="section">
-        <div class="glass">
-            <h2>📡 Присоединяйся</h2>
-            <p>
-                Будь в курсе всех событий. Включай уведомления и получай критические угрозы первым.
-            </p>
-            <div class="links-grid">
-                <a href="https://t.me/+Z3hzr2cePXRkOWNh" target="_blank" class="link-btn">
-                    <span class="icon">📡</span>
-                    <span class="label">Telegram-канал</span>
-                    <span class="url">t.me/+Z3hzr2cePXRkOWNh</span>
-                </a>
-                <a href="https://t.me/VikingTypebot" target="_blank" class="link-btn">
-                    <span class="icon">🤖</span>
-                    <span class="label">Связь с админом (бот)</span>
-                    <span class="url">@VikingTypebot</span>
-                </a>
-                <a href="https://t.me/c/4404817636/5" target="_blank" class="link-btn">
-                    <span class="icon">📘</span>
-                    <span class="label">Основы цифровой безопасности</span>
-                    <span class="url">кликабельно</span>
-                </a>
-            </div>
-            <div class="feedback-section">
-                <span class="text">📬 Нашли уязвимость? Есть инсайд?</span>
-                <a href="https://t.me/rootvane" target="_blank" class="contact-btn">✍️ @rootvane</a>
-            </div>
+  <div class="knot-divider">
+    <div class="line"></div>
+    <svg class="ship-drift" viewBox="0 0 300 60" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="animation-delay:-14s;">
+      <path d="M10 45 Q40 55 150 55 Q260 55 290 45 L270 40 Q150 48 30 40 Z" fill="#5fae8f"/>
+      <path d="M270 40 C282 30 286 15 274 5 C270 13 264 23 259 30 Z" fill="#5fae8f"/>
+      <line x1="150" y1="40" x2="150" y2="6" stroke="#d1a054" stroke-width="2"/>
+      <path d="M150 9 L192 20 L150 31 Z" fill="#d1a054" opacity="0.75"/>
+    </svg>
+    <svg class="knot-mark knot-svg" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M20 4 L20 14 L12 14 L12 20 M20 4 L20 14 L28 14 L28 20 M20 36 L20 26 L12 26 L12 20 M20 36 L20 26 L28 26 L28 20"/>
+      <circle cx="20" cy="4" r="2"/><circle cx="20" cy="36" r="2"/>
+    </svg>
+    <div class="line"></div>
+  </div>
+
+  <section id="contact" class="section">
+    <div class="section-head">
+      <div>
+        <div class="rune-tag"><span class="glyph">ᛗ</span>Манназ — руна человека и общины</div>
+        <h2>Присоединяйся</h2>
+      </div>
+    </div>
+    <div class="tilt-card">
+      <div class="panel">
+        <p>Будь в курсе всех событий. Включай уведомления и получай критические угрозы первым.</p>
+
+        <div class="links-grid">
+          <a href="https://t.me/+Z3hzr2cePXRkOWNh" target="_blank" rel="noopener" class="link-btn">
+            <span class="icon">📡</span>
+            <span class="label">Telegram-канал</span>
+            <span class="url">t.me/+Z3hzr2cePXRkOWNh</span>
+          </a>
+          <a href="https://t.me/VikingTypebot" target="_blank" rel="noopener" class="link-btn">
+            <span class="icon">🤖</span>
+            <span class="label">Связь с админом (бот)</span>
+            <span class="url">@VikingTypebot</span>
+          </a>
+          <a href="https://t.me/c/4404817636/5" target="_blank" rel="noopener" class="link-btn">
+            <span class="icon">📘</span>
+            <span class="label">Основы цифровой безопасности</span>
+            <span class="url">кликабельно</span>
+          </a>
         </div>
-    </section>
 
-    <footer class="footer">
-        <span>🛡️ Viking.net — твой щит в мире InfoSec</span><br>
-        <span style="display:inline-block; margin-top:8px;">
-            <a href="https://t.me/+Z3hzr2cePXRkOWNh" target="_blank">Канал</a> · 
-            <a href="https://t.me/VikingTypebot" target="_blank">Бот</a>
-        </span>
-    </footer>
+        <div class="feedback-bar">
+          <span class="text">📬 Нашли уязвимость? Есть инсайд?</span>
+          <a href="https://t.me/rootvane" target="_blank" rel="noopener" class="contact-btn">
+            <svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="8" rx="1.5"/><rect x="10" y="10" width="4" height="11" rx="1"/></svg>
+            @rootvane
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="knot-divider">
+    <div class="line"></div>
+    <svg class="knot-mark knot-svg" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M20 4 L20 14 L12 14 L12 20 M20 4 L20 14 L28 14 L28 20 M20 36 L20 26 L12 26 L12 20 M20 36 L20 26 L28 26 L28 20"/>
+      <circle cx="20" cy="4" r="2"/><circle cx="20" cy="36" r="2"/>
+    </svg>
+    <div class="line"></div>
+  </div>
+
+  <footer class="footer">
+    <svg class="yggdrasil" viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <g fill="none" stroke="#5fae8f" stroke-width="1.4">
+        <path d="M300 0 L300 90"/>
+        <path d="M300 90 L220 160 M300 90 L380 160 M300 90 L300 180 M300 90 L250 180 M300 90 L350 180"/>
+        <path d="M300 40 L200 20 M300 40 L400 20 M300 60 L180 70 M300 60 L420 70"/>
+      </g>
+    </svg>
+    <img src="img.png" alt="Viking.net" class="logo-img" onerror="this.style.display='none'">
+    <div>Viking.net — твой щит в мире InfoSec</div>
+    <div class="foot-links">
+      <a href="https://t.me/+Z3hzr2cePXRkOWNh" target="_blank" rel="noopener">Канал</a>·
+      <a href="https://t.me/VikingTypebot" target="_blank" rel="noopener">Бот</a>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      function applyDeviceProfile () {
+        var w = window.innerWidth;
+        var dpr = window.devicePixelRatio || 1;
+        var viewport = w < 480 ? 'xs' : w < 768 ? 'sm' : w < 1200 ? 'md' : w < 1600 ? 'lg' : 'xl';
+        var root = document.documentElement;
+        root.setAttribute('data-viewport', viewport);
+        root.setAttribute('data-dpr', dpr >= 2 ? 'hi' : 'std');
+
+        var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var noHover = window.matchMedia('(hover: none)').matches;
+        var lowPower = viewport === 'xs' && dpr < 2;
+        root.setAttribute('data-motion', (prefersReduced || lowPower) ? 'off' : 'on');
+        root.setAttribute('data-pointer', noHover ? 'coarse' : 'fine');
+      }
+      applyDeviceProfile();
+      window.addEventListener('resize', applyDeviceProfile);
+      window.addEventListener('orientationchange', applyDeviceProfile);
+
+      function motionOK(){
+        return document.documentElement.getAttribute('data-motion') !== 'off'
+            && document.documentElement.getAttribute('data-pointer') === 'fine';
+      }
+
+      // 3D tilt + moving glass sheen on the panels
+      document.querySelectorAll('.tilt-card').forEach(function (card) {
+        var max = 5;
+        card.addEventListener('pointermove', function (e) {
+          if (e.pointerType !== 'mouse' || !motionOK()) return;
+          var r = card.getBoundingClientRect();
+          var x = (e.clientX - r.left) / r.width;
+          var y = (e.clientY - r.top) / r.height;
+          var rotY = (x - 0.5) * max * 2;
+          var rotX = (0.5 - y) * max * 2;
+          card.style.transform = 'perspective(1000px) rotateX(' + rotX + 'deg) rotateY(' + rotY + 'deg) translateZ(4px)';
+          card.querySelector('.panel').style.setProperty('--mx', (x * 100) + '%');
+          card.querySelector('.panel').style.setProperty('--my', (y * 100) + '%');
+        });
+        card.addEventListener('pointerleave', function () {
+          card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) translateZ(0)';
+        });
+      });
+
+      // hero shield tilts gently toward the cursor
+      var hero = document.querySelector('.hero');
+      var shield = document.getElementById('heroShield');
+      if (hero && shield) {
+        hero.addEventListener('pointermove', function (e) {
+          if (e.pointerType !== 'mouse' || !motionOK()) return;
+          var r = hero.getBoundingClientRect();
+          var x = (e.clientX - r.left) / r.width - 0.5;
+          var y = (e.clientY - r.top) / r.height - 0.5;
+          shield.style.transform = 'rotateY(' + (x * 16) + 'deg) rotateX(' + (-y * 16) + 'deg)';
+        });
+        hero.addEventListener('pointerleave', function () {
+          shield.style.transform = 'rotateY(0) rotateX(0)';
+        });
+      }
+    })();
+  </script>
 
 </body>
 </html>
